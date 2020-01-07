@@ -8,10 +8,12 @@
     </head>
     <body>
         <div> Microblog:
-<!--            <a href="/index">Home</a>-->
             <a href="{{ url_for('index') }}">Home</a>
-<!--            <a href="/login">Login</a>-->
-            <a href="{{ url_for('login') }}">login</a>
+            {% if current_user.is_anonymous %}
+            <a href="{{ url_for('login') }}">log In</a>
+            {% else %}
+            <a href="{{ url_for('logout') }}">Log Out</a>
+            {% endif %}
         </div>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
