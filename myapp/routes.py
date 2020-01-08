@@ -90,7 +90,7 @@ def user(username):
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-    form = EditProfileForm()
+    form = EditProfileForm(current_user.username) # Passing the currnet user's username as argument
 
     # TODO: TASK 1: As a user I can't add a todo without a description.
     if form.validate_on_submit(): # POST
