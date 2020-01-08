@@ -11,4 +11,4 @@ migrate = Migrate(app, db)
 login = LoginManager(app)   # for log_in / log_out
 login.login_view = 'login'  # TODO for @login_required
 
-from myapp import routes, models   # myapp is from the directory name
+from myapp import routes, models, errors  # myapp is from the directory name
