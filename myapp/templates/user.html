@@ -8,12 +8,28 @@
                 <h1>User: {{ user.username }}</h1>
                 {% if user.about_me %}<p> {{ user.about_me }}</p>{% endif %}
                 {% if user.last_seen %}<p>{{ user.last_seen }}</p>{% endif %}
+
+                <h1>Following</h1>
+                <p><b>Followers: </b>{{ user.followers.count() }}</p>
+                {% for follower in user.followers.all() %}
+                <p><a href="{{ url_for('user', username=follower.username) }}">{{ follower.username }}</a></p>
+                {% endfor %}
+                <p><b>Followings:</b> {{ user.followed.count() }}</p>
+                {% for follower in user.followed.all() %}
+                <p><a href="{{ url_for('user', username=follower.username) }}">{{ follower.username }}</a></p>
+                {% endfor %}
+
                 {% if user == current_user %}
-                <p><a href="{{ url_for('edit_profile') }}">Edit profile</a></p>
+                <p><a href="{{ url_for('edit_profile') }}"><input type="button" value="Edit Profile"></a></p>
+                {% elif current_user.is_following(user) %}
+                <p><a href="{{ url_for('unfollow', username = user.username) }}"><input type="button" value="Unfollow"></a></p>
+                {% else %}
+                <p><a href="{{ url_for('follow', username = user.username) }}"><input type="button" value="Follow"></a></p>
                 {% endif %} <!--only user can edit own profile -->
             </td>
         </tr>
     </table>
+
     {% for post in posts %}
         {% include "_post.html" %}
     {% endfor %}

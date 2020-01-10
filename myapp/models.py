@@ -24,7 +24,6 @@ class User(UserMixin, db.Model):
         secondaryjoin=(followers.c.followed_id == id),
         backref=db.backref('followers', lazy='dynamic'), lazy='dynamic')
 
-
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
@@ -36,7 +35,7 @@ class User(UserMixin, db.Model):
 
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
-        return 'https://gravatar.com/avatar/{}?d=identicon&s={}'.format(
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
             digest, size)
 
     def follow(self, user):
@@ -51,6 +50,13 @@ class User(UserMixin, db.Model):
         return self.followed.filter(
             followers.c.followed_id == user.id).count() > 0
 
+    def followed_posts(self):
+        # followed = Posts I follow someone (Paduck => Darly)
+        followed = Post.query.join(
+            followers,(followers.c.followed_id == Post.user_id)).filter(
+                followers.c.follower_id == self.id)
+        # My posts + Posts I followed
+        return followed.union(self.posts).order_by(Post.timestamp.desc())
 
 
 # for login logout setup
