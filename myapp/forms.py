@@ -45,3 +45,8 @@ class EditProfileForm(FlaskForm):
             user = User.query.filter_by(username=new_username.data).first()
             if user is not None: # if a user with new_username is already exist
                 raise ValidationError('Please use a different Username :)')
+
+class PostForm(FlaskForm):
+    post = TextAreaField('Post', validators=[
+        DataRequired(), Length(min=1, max=140)])
+    submit = SubmitField('Submit')

@@ -1,10 +1,10 @@
 from datetime import datetime
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, unittest
 from werkzeug.urls import url_parse
 from flask_login import login_user, current_user, logout_user, login_required
 from myapp import app, db
-from myapp.forms import LoginForm, RegistrationForm, EditProfileForm
-from myapp.models import User
+from myapp.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm
+from myapp.models import User, Post
 
 
 # apply this function to all the routes below
@@ -16,21 +16,39 @@ def before_request():
         db.session.commit()
 
 
-@app.route('/')
-@app.route('/index')
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
 @login_required # only available with log_in user
 def index():
-    posts = [
-        {
-            'author': { 'username' : 'John'},
-            'body' : "Harry potter is fun to read, but he has't read it"
-        },
-        {
-            'author': { 'username': 'Mary' },
-            'body' : 'My chin condition is not good'
-        }
-    ]
-    return render_template('index.html', posts=posts)
+    form = PostForm()
+    # unittest.main()
+    if form.validate_on_submit():
+        post = Post(body=form.post.data, author=current_user)
+        # post = Post(post=form.body.data, user_id=current_user.id)
+        db.session.add(post)
+        db.session.commit()
+        flash('new post added')
+        return redirect(url_for('index'))
+
+    # TODO: * TASK 5: As a user I can see my list of todos paginated.
+    page = request.args.get('page', 1, type=int) # query string argument = /index?page=3 <- want to get this 3
+    posts = current_user.followed_posts().paginate(
+        page, app.config['POST_PER_PAGE'], False)
+    next_url = url_for('index', page=posts.next_num) if posts.has_next else None
+    prev_url = url_for('index', page=posts.prev_num) if posts.has_prev else None
+    return render_template('index.html', posts=posts.items, form=form,
+                           next_url=next_url, prev_url=prev_url)
+
+
+@app.route('/explore')
+def explore():
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, app.config['POST_PER_PAGE'], False)
+    next_url = url_for('explore', page=posts.next_num) if posts.has_next else None
+    prev_url = url_for('explore', page=posts.prev_num) if posts.has_prev else None
+    return render_template('index.html', title="All posts", posts=posts.items,
+                           next_url=next_url, prev_url=prev_url)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -80,12 +98,14 @@ def register():
 @login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404() # if user is not founded, raise 404 error page
-    posts = [
-        {'author': user, 'body': 'Test post #1'},
-        {'author': user, 'body': 'Test post #2'}
-    ]
-    # posts = user.followed_posts()
-    return render_template('user.html', user=user, posts=posts)
+    page = request.args.get('page', 1, type=int) # query string argument = /index?page=3 <- want to get this 3
+    posts = user.posts.order_by(Post.timestamp.desc()).paginate(
+        page, app.config['POST_PER_PAGE'], False)
+
+    next_url = url_for('user', username=user.username, page=posts.next_num) if posts.has_next else None
+    prev_url = url_for('user', username=user.username, page=posts.prev_num) if posts.has_prev else None
+    return render_template('user.html', user=user, posts=posts.items,
+                           next_url=next_url, prev_url=prev_url)
 
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
