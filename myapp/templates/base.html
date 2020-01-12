@@ -12,20 +12,25 @@
         {% else %}
         <title> Hello world </title>
         {% endif %}
-    </head>
-    <body>
-        <div> Microblog:
-            <a href="{{ url_for('index') }}">Home</a>
-            <a href="{{ url_for('explore') }}">Explore</a>
-            {% if current_user.is_anonymous %}
-            <a href="{{ url_for('login') }}">log In</a>
-            {% else %}
-            <a href="{{ url_for('user', username = current_user.username) }}">My page</a>
-            <a href="{{ url_for('logout') }}">Log Out</a>
-            {% endif %}
-        </div>
+{% endblock %}
+
+{% block navbar %}
+    <div> Microblog:
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('explore') }}">Explore</a>
+        {% if current_user.is_anonymous %}
+        <a href="{{ url_for('login') }}">log In</a>
+        {% else %}
+        <a href="{{ url_for('user', username = current_user.username) }}">My page</a>
+        <a href="{{ url_for('logout') }}">Log Out</a>
+        {% endif %}
+    </div>
+{% endblock %}
+
 
         <!-- TODO: for flash message to show up-->
+{% block content %}
+    <div class="container">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         <ul>
@@ -35,6 +40,6 @@
         </ul>
         {% endif %}
         {% endwith %}
-        {% block content %}{% endblock %}
-    </body>
-</html>
+        {% block app_content %}{% endblock %}
+    </div>
+{% endblock %}
