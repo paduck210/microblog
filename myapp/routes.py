@@ -1,10 +1,11 @@
 from datetime import datetime
-from flask import render_template, flash, redirect, url_for, request, unittest
+from flask import render_template, flash, redirect, url_for, request
 from werkzeug.urls import url_parse
 from flask_login import login_user, current_user, logout_user, login_required
 from myapp import app, db
 from myapp.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm
 from myapp.models import User, Post
+from flask_paginate import Pagination, get_page_parameter
 
 
 # apply this function to all the routes below
@@ -21,34 +22,38 @@ def before_request():
 @login_required # only available with log_in user
 def index():
     form = PostForm()
-    # unittest.main()
     if form.validate_on_submit():
         post = Post(body=form.post.data, author=current_user)
-        # post = Post(post=form.body.data, user_id=current_user.id)
         db.session.add(post)
         db.session.commit()
         flash('new post added')
         return redirect(url_for('index'))
 
     # TODO: * TASK 5: As a user I can see my list of todos paginated.
-    page = request.args.get('page', 1, type=int) # query string argument = /index?page=3 <- want to get this 3
+    page = request.args.get(get_page_parameter(), type=int, default=1) # query string argument = /index?page=3 <- want to get this 3
+    per_page = app.config['POST_PER_PAGE']
     posts = current_user.followed_posts().paginate(
         page, app.config['POST_PER_PAGE'], False)
+    total_posts = current_user.followed_posts().count()
     next_url = url_for('index', page=posts.next_num) if posts.has_next else None
     prev_url = url_for('index', page=posts.prev_num) if posts.has_prev else None
-    return render_template('index.html', posts=posts.items, form=form,
-                           next_url=next_url, prev_url=prev_url)
+    pagination = Pagination(page=page, per_page=per_page, total=total_posts, record_name='posts', css_framework='foundation')
+    return render_template('index.html', form=form, posts=posts.items,
+                           pagination=pagination, next_url=next_url, prev_url=prev_url)
 
 
 @app.route('/explore')
 def explore():
     page = request.args.get('page', 1, type=int)
+    per_page = app.config['POST_PER_PAGE']
     posts = Post.query.order_by(Post.timestamp.desc()).paginate(
         page, app.config['POST_PER_PAGE'], False)
+    total_posts = Post.query.count()
+    pagination = Pagination(page=page, per_page=per_page, total=total_posts, record_name='posts', css_framework='foundation')
     next_url = url_for('explore', page=posts.next_num) if posts.has_next else None
     prev_url = url_for('explore', page=posts.prev_num) if posts.has_prev else None
     return render_template('index.html', title="All posts", posts=posts.items,
-                           next_url=next_url, prev_url=prev_url)
+                           pagination=pagination, next_url=next_url, prev_url=prev_url)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -101,7 +106,6 @@ def user(username):
     page = request.args.get('page', 1, type=int) # query string argument = /index?page=3 <- want to get this 3
     posts = user.posts.order_by(Post.timestamp.desc()).paginate(
         page, app.config['POST_PER_PAGE'], False)
-
     next_url = url_for('user', username=user.username, page=posts.next_num) if posts.has_next else None
     prev_url = url_for('user', username=user.username, page=posts.prev_num) if posts.has_prev else None
     return render_template('user.html', user=user, posts=posts.items,
