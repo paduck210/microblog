@@ -3,7 +3,7 @@
             {% if post.author == current_user %}
             <td>
                 <form action="{{ url_for('post_delete', id=post.id) }}">
-                    <button type="submit" class="btn btn-xs btn-danger">
+                    <button type="submit" name="delete_btn" value="delete" class="btn btn-xs btn-danger">
                         <span class="glyphicon glyphicon-remove glyphicon-white"></span>
                     </button>
                 </form>
@@ -17,19 +17,11 @@
                 says: {{ post.body }}
             </td>
             {% if post.author == current_user %}
-                {% if post.completed == 0 %}
                 <td>
-                    <form method="POST" action="{{ url_for('post_completed', id=post.id) }}">
-                        <input type="checkbox" name="checkbox" value="mark_completed" onchange="this.form.submit()">
+                    <form method="POST" action="{{ url_for('post_completed', id=post.id, status=0 if post.completed == 1 else 1) }}">
+                        <button type="submit" class="btn btn-xs"><span class="glyphicon {% if post.completed %}glyphicon-check{% else %}glyphicon-unchecked{% endif %} glyphicon-white"></span></button
                     </form>
                 </td>
-                {% else %}
-                <td>
-                    <form method="POST" action="{{ url_for('post_completed', id=post.id) }}">
-                        <input type="checkbox" name="checkbox" value="mark_uncompleted" onchange="this.form.submit()" checked>
-                    </form>
-                </td>
-                {% endif %}
             {% endif %}
     </table>
 

@@ -43,21 +43,24 @@ def index():
 
 
 # TODO: Mark Completed Post
-@app.route('/post/<id>', methods=['GET', 'POST'])
+@app.route('/post/<id>/completed/<status>', methods=['POST'])
 @login_required
-def post_completed(id):
-    post = Post.query.filter_by(id=id).first()
-    if request.form.get('checkbox') == "mark_completed":
-        post.mark_completed()
-    else:
-        post.mark_uncompleted()
-    db.session.commit()
-    flash('Change Status of Post')
-    return redirect('/index')
+def post_completed(id, status):
+        post = Post.query.filter_by(id=id).first()
+        if status == '1':
+            post.mark_completed()
+            db.session.commit()
+            flash('Mark completed the Post')
+            return redirect(url_for('index'))
+        else:
+            post.mark_uncompleted()
+            db.session.commit()
+            flash('Mark uncompleted the Post')
+            return redirect(url_for('index'))
 
 
 # TODO: Delete Post without form class
-@app.route('/post/<id>', methods=['GET', 'POST'])
+@app.route('/post/<id>', methods=['GET','POST'])
 @login_required
 def post_delete(id):
     post = Post.query.filter_by(id=id).first()
@@ -65,7 +68,6 @@ def post_delete(id):
     db.session.commit()
     flash('Post Deleted')
     return redirect('/index')
-
 
 
 @app.route('/explore')
