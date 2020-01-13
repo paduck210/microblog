@@ -42,6 +42,17 @@ def index():
                            pagination=pagination, next_url=next_url, prev_url=prev_url)
 
 
+# TODO: Delete Post without form class
+@app.route('/post/<id>', methods=['GET', 'POST'])
+@login_required
+def post_delete(id):
+    post = Post.query.filter_by(id=id).first()
+    db.session.delete(post)
+    db.session.commit()
+    flash('Post Deleted')
+    return redirect('/index')
+
+
 @app.route('/explore')
 def explore():
     page = request.args.get('page', 1, type=int)
@@ -164,3 +175,4 @@ def unfollow(username):
     db.session.commit()
     flash("Now you unfollow {} :)".format(username))
     return redirect(url_for('user', username=username))
+
