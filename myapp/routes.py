@@ -42,6 +42,20 @@ def index():
                            pagination=pagination, next_url=next_url, prev_url=prev_url)
 
 
+# TODO: Mark Completed Post
+@app.route('/post/<id>', methods=['GET', 'POST'])
+@login_required
+def post_completed(id):
+    post = Post.query.filter_by(id=id).first()
+    if request.form.get('checkbox') == "mark_completed":
+        post.mark_completed()
+    else:
+        post.mark_uncompleted()
+    db.session.commit()
+    flash('Change Status of Post')
+    return redirect('/index')
+
+
 # TODO: Delete Post without form class
 @app.route('/post/<id>', methods=['GET', 'POST'])
 @login_required
@@ -51,6 +65,7 @@ def post_delete(id):
     db.session.commit()
     flash('Post Deleted')
     return redirect('/index')
+
 
 
 @app.route('/explore')

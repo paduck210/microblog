@@ -7,7 +7,6 @@
                         <span class="glyphicon glyphicon-remove glyphicon-white"></span>
                     </button>
                 </form>
-
             </td>
             {% endif %}
             <td><img src="{{ post.author.avatar(36) }}"></td>
@@ -17,4 +16,20 @@
                 </a>
                 says: {{ post.body }}
             </td>
+            {% if post.author == current_user %}
+                {% if post.completed == 0 %}
+                <td>
+                    <form method="POST" action="{{ url_for('post_completed', id=post.id) }}">
+                        <input type="checkbox" name="checkbox" value="mark_completed" onchange="this.form.submit()">
+                    </form>
+                </td>
+                {% else %}
+                <td>
+                    <form method="POST" action="{{ url_for('post_completed', id=post.id) }}">
+                        <input type="checkbox" name="checkbox" value="mark_uncompleted" onchange="this.form.submit()" checked>
+                    </form>
+                </td>
+                {% endif %}
+            {% endif %}
     </table>
+

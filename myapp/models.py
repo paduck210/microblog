@@ -75,4 +75,9 @@ class Post(db.Model):
     def __repr__(self):
         return '<Post {}>'.format(self.body)
 
+    def mark_completed(self):
+        self.completed = 1
+
+    def mark_uncompleted(self):
+        self.completed = 0
 
