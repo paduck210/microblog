@@ -75,3 +75,4 @@ sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed
 [parameters: ('paduck', 'sdgregfefwefwe', 2)]
 (Background on this error at: http://sqlalche.me/e/gkpj)
 2020-01-11 17:26:27,874 INFO: Microblog startup [in /Users/paduck/code/paduck210/microblog/myapp/__init__.py:47]
+2020-01-12 21:00:01,446 INFO: Microblog startup [in /Users/paduck/code/paduck210/microblog/myapp/__init__.py:48]
